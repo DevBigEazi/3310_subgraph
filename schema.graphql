@@ -1,8 +1,81 @@
+# ==================== AGGREGATED ENTITIES ====================
+
+"""
+Player entity - Tracks all-time stats for each player
+ID: player address
+"""
+type Player @entity(immutable: false) {
+  id: Bytes! # player address
+  highestGameScore: BigInt! # Highest single game score all-time
+  highestDailyScore: BigInt! # Highest daily score all-time
+  totalGamesPlayed: BigInt! # Total games across all days
+  totalReferralPoints: BigInt! # Total referral points earned
+  totalLifetimeScore: BigInt! # Total points across all days
+  totalRewardsClaimed: BigInt! # Total rewards claimed in wei
+  totalRewardsEarned: BigInt! # Total rewards earned (including unclaimed)
+  # Relations
+  dailyEntries: [DailyLeaderboardEntry!]! @derivedFrom(field: "player")
+
+  # Metadata
+  firstPlayedAt: BigInt! # Timestamp of first score submission
+  lastPlayedAt: BigInt! # Timestamp of last score submission
+  daysPlayed: BigInt! # Number of unique days played
+}
+
+"""
+DailyLeaderboardEntry - Represents a player's performance on a specific day
+ID: dayId-playerAddress
+"""
+type DailyLeaderboardEntry @entity(immutable: false) {
+  id: String! # Format: "dayId-playerAddress"
+  dayId: BigInt! # Day identifier
+  player: Player! # Reference to Player entity
+  playerAddress: Bytes! # Player address (for filtering)
+  # Daily scores
+  dailyScore: BigInt! # Daily accumulated score
+  gameScore: BigInt! # Highest single game score this day
+  gameCount: BigInt! # Total games played this day
+  referralPoints: BigInt! # Referral points earned this day
+  rank: BigInt! # Leaderboard rank (1-10, 0 if not in top 10)
+  # Reward info
+  rewardAmount: BigInt! # Reward earned this day (0 if not distributed yet)
+  rewardClaimed: Boolean! # Whether reward has been claimed
+  # Metadata
+  lastUpdated: BigInt! # Timestamp of last score update
+  transactionHash: Bytes! # Last transaction hash
+}
+
+"""
+DayStats - Aggregated statistics for each day
+ID: dayId
+"""
+type DayStats @entity(immutable: false) {
+  id: String! # dayId as string
+  dayId: BigInt! # Day identifier
+  # Leaderboard info
+  topTenCount: BigInt! # Number of players in top 10
+  totalPlayers: BigInt! # Total unique players who played this day
+  # Reward pool info
+  basePool: BigInt! # Base pool for the day
+  rolloverAmount: BigInt! # Rolled over from previous day
+  totalPool: BigInt! # Total reward pool
+  totalDistributed: BigInt! # Total rewards distributed
+  hasDistributed: Boolean! # Whether rewards have been distributed
+  # Game stats
+  highestScore: BigInt! # Highest score achieved this day
+  totalGamesPlayed: BigInt! # Total games played this day
+  # Metadata
+  startTimestamp: BigInt! # Day start timestamp
+  endTimestamp: BigInt! # Day end timestamp
+}
+
+# ==================== EVENT ENTITIES (Immutable) ====================
+
 type AllTimeStatsUpdated @entity(immutable: true) {
   id: Bytes!
   player: Bytes! # address
   highestGameScore: BigInt! # uint256
-  highestWeeklyScore: BigInt! # uint256
+  highestDailyScore: BigInt! # uint256 (was highestWeeklyScore)
   blockNumber: BigInt!
   blockTimestamp: BigInt!
   transactionHash: Bytes!
@@ -26,7 +99,7 @@ type Initialized @entity(immutable: true) {
 
 type LeaderboardUpdated @entity(immutable: true) {
   id: Bytes!
-  weekId: BigInt! # uint256
+  dayId: BigInt! # uint256 (was weekId)
   topTenCount: BigInt! # uint256
   blockNumber: BigInt!
   blockTimestamp: BigInt!
@@ -64,7 +137,7 @@ type RewardClaimed @entity(immutable: true) {
   id: Bytes!
   player: Bytes! # address
   totalAmount: BigInt! # uint256
-  weekCount: BigInt! # uint256
+  dayCount: BigInt! # uint256 (was weekCount)
   blockNumber: BigInt!
   blockTimestamp: BigInt!
   transactionHash: Bytes!
@@ -73,7 +146,7 @@ type RewardClaimed @entity(immutable: true) {
 type RewardEscrowed @entity(immutable: true) {
   id: Bytes!
   player: Bytes! # address
-  weekId: BigInt! # uint256
+  dayId: BigInt! # uint256 (was weekId)
   amount: BigInt! # uint256
   blockNumber: BigInt!
   blockTimestamp: BigInt!
@@ -82,7 +155,7 @@ type RewardEscrowed @entity(immutable: true) {
 
 type RewardsDistributed @entity(immutable: true) {
   id: Bytes!
-  weekId: BigInt! # uint256
+  dayId: BigInt! # uint256 (was weekId)
   totalDistributed: BigInt! # uint256
   rolloverAmount: BigInt! # uint256
   blockNumber: BigInt!
@@ -93,8 +166,8 @@ type RewardsDistributed @entity(immutable: true) {
 type ScoreSubmitted @entity(immutable: true) {
   id: Bytes!
   player: Bytes! # address
-  weekId: BigInt! # uint256
-  weeklyScore: BigInt! # uint256
+  dayId: BigInt! # uint256 (was weekId)
+  dailyScore: BigInt! # uint256 (was weeklyScore)
   gameScore: BigInt! # uint256
   gameCount: BigInt! # uint256
   rank: BigInt! # uint256
