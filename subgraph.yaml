@@ -6,11 +6,11 @@ schema:
 dataSources:
   - kind: ethereum
     name: Play3310V1Proxy
-    network: celo-sepolia
+    network: celo
     source:
-      address: "0xD9d208F58D946A07c1E846f543Cf3119c288311E"
+      address: "0xB3a8ABD5F088C22A5Ac4b2C7AF5dD4439fdc85d4"
       abi: Play3310V1
-      startBlock: 10647621
+      startBlock: 53374268
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9

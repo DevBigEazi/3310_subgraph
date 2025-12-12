@@ -1,8 +1,13 @@
-{
-  "celo-sepolia": {
-    "Play3310V1": {
+{"celo-sepolia": {
+    "Play3310Proxy": {
       "address": "0x67648938d99bd1809987F18a09f427D8da6C88fd",
       "startBlock": 10647621
+    }
+  },
+  "celo": {
+    "Play3310Proxy": {
+      "address": "0xB3a8ABD5F088C22A5Ac4b2C7AF5dD4439fdc85d4",
+      "startBlock": 53374268
     }
   }
 }
